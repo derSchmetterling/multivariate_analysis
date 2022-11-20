@@ -1,0 +1,102 @@
+---
+title: "trab4"
+author: "Pedro Vinicius Alves"
+date: "2022-11-20"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library("factoextra")
+library("FactoMineR")
+library(GGally)
+```
+
+
+
+
+
+## Lista 6 - Questão 1
+
+
+
+
+
+```{r cars}
+
+
+data_protein = read.table('protein.csv', sep = ',', header = TRUE)
+data_drop = data_protein[,c(2:11)]
+#pca_df = df_flower[,c('sepal.length', 'sepal.width', 'petal.length', 'petal.width')]
+boxplot(data_drop)
+```
+Inicialmente, percebe-se que a variância da quantidade de proteína para os diferentes alimentos diverge consideravelmente.
+
+```{r}
+
+
+ggcorr(data_drop,method=c("pairwise"),label=T, label_size=3, label_round=2)
+```
+
+
+Abaixo adquirimos as componentes principais.
+
+```{r}
+protein_pca = PCA(data_drop, graph = F,scale.unit  = TRUE)
+summary(protein_pca)
+```
+
+```{r}
+print(protein_pca)
+```
+
+
+```{r}
+
+eig.val <- get_eigenvalue(protein_pca)
+fviz_eig(protein_pca, addlabels = TRUE, ylim = c(0, 100))
+
+```
+
+Pelo screeplot acima, vemos que as primeiras quatro componentes principais são capazes de explicar aproximadamente 85% da variância dos dados.
+
+```{r}
+library("corrplot")
+var <- get_pca_var(protein_pca)
+corrplot(var$cor, is.corr=FALSE) 
+```
+
+```{r}
+# Contribuições das variáveia para CP1
+fviz_contrib(protein_pca, choice = "var", axes = 1, top = 15)
+fviz_contrib(protein_pca, choice = "var", axes = 2, top = 15)
+fviz_contrib(protein_pca, choice = "var", axes = 3, top = 15)
+fviz_contrib(protein_pca, choice = "var", axes = 4, top = 15)
+```
+
+
+
+A seguir, procuramos propor uma interpretação para as quatro primeiras componentes principais.
+PC1 - componente de relação entre produtos de origem animal e origem vegetal, já que cereais, nozes e sementes, ovos e leites contribuem significativamente para a PC1 e os dois primeiros tem correlação negativa com PC1, enquanto os dois últimos possuem correlação positiva.
+PC2 - componente de consumo de peixes, já que há forte correlação entre o consumo de peixe e PC2
+PC3 - componente de consumo de carne branca, já que esse tipo de proteína contribui mais para a PC3 e tem forte correlação com ela
+PC4 - componente de contraste entre o consumo de carne vermelha e frutas e vegetais, já que ambas contribuem significativamente para a PC4 e a primeira tem correlação positiva, enquanto a segunda tem correlação negativa com a PC4.
+
+
+
+```{r}
+fviz_pca_biplot(protein_pca)
+```
+
+Por fim, plotando as observações juntamente com as categorias, notamos que os países 17 e 19, referentes a Portugal e Espanha, distinguem-se dos demais em consumo de proteínas provindas de frutas e vegetais.
+
+
+```{r}
+data_protein[c(17,19),]
+```
+
+## b - Análise Fatorial
