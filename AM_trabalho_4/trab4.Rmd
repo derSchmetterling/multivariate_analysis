@@ -14,6 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library("factoextra")
 library("FactoMineR")
 library(GGally)
+library(psych)
+library(stats)
 ```
 
 
@@ -50,9 +52,7 @@ protein_pca = PCA(data_drop, graph = F,scale.unit  = TRUE)
 summary(protein_pca)
 ```
 
-```{r}
-print(protein_pca)
-```
+
 
 
 ```{r}
@@ -92,7 +92,7 @@ PC4 - componente de contraste entre o consumo de carne vermelha e frutas e veget
 fviz_pca_biplot(protein_pca)
 ```
 
-Por fim, plotando as observações juntamente com as categorias, notamos que os países 17 e 19, referentes a Portugal e Espanha, distinguem-se dos demais em consumo de proteínas provindas de frutas e vegetais.
+Por fim, plotando as observações juntamente com as categorias, notamos que os países 17 e 19, referentes a Portugal e Espanha, distinguem-se claramente dos demais em consumo de proteínas provindas de frutas e vegetais.
 
 
 ```{r}
@@ -100,3 +100,74 @@ data_protein[c(17,19),]
 ```
 
 ## b - Análise Fatorial
+
+Testando várias quantidades de fatores, a proporção de variância explicada não é significativamente melhorada por mais de 4 fatores, então seguimos a análise com essa quantidade.
+
+```{r}
+fit1 <- principal( data_drop,nfactors=4, rotate="none", fm = 'mle',scores = T) # 
+fit1
+```
+
+
+
+Analogamente a análise de componentes principais, Portugal e Espanha se distinguem dos outros países.
+```{r}
+scores.bart <- fit1$scores
+
+ggplot(data_protein, aes(x= scores.bart[, 1], y= scores.bart[, 2], colour="red", label=Country))+
+  geom_point() +geom_text(aes(label=Country),hjust=0, vjust=0)
+
+
+```
+```{r}
+
+```
+
+
+Podemos procurar melhorar a interpretação dos fatores por meio de uma rotação. AO utilizarmos o método varimax, vemos que Portugal e Espanha não mais se distinguem. Ao invés disso, temos um espaçamento quase homogêneo dos países
+
+```{r}
+
+
+library(GPArotation)
+fit2 <- principal( data_drop,nfactors=4, rotate="quartimax",scores = T) #
+
+scores.bart <- fit2$scores
+
+ggplot(data_protein, aes(x= scores.bart[, 1], y= scores.bart[, 2], colour="red", label=Country))+
+  geom_point() +geom_text(aes(label=Country),hjust=0, vjust=0)
+
+
+```
+
+
+Pelo método quartimax, a rotação aumenta o espaçamento entre os países de modo a gerar uma distribuição mais esparsa e Portugal e Espanha tem um desvio menos aparente do que os fatores sem a rotação.
+```{r}
+
+library(GPArotation)
+fit3 <- principal( data_drop,nfactors=4, rotate="varimax",scores = T) #
+
+scores.bart <- fit3$scores
+
+ggplot(data_protein, aes(x= scores.bart[, 1], y= scores.bart[, 2], colour="red", label=Country))+
+  geom_point() +geom_text(aes(label=Country),hjust=0, vjust=0)
+```
+
+Por fim, analisamos as relações de cada variável com seus fatores. O primeiro diagrama representa o modelo sem rotação, o segundo, varimax, e o terceiro, quartimax.
+```{r}
+fa.diagram(fit1)
+fa.diagram(fit2)
+fa.diagram(fit3)
+
+
+```
+
+O método sem rotação e varimax geram relações desproporcionais entre os fatores e as variáveis, de modo que alguns fatores são correlacionados com várias variáveis e outros, com apenas uma ou duas. O modelo mais equilibrado, então, é gerado pelo método quartimax, porém o modelo mais eficaz em separar os países é o modelo sem rotação.
+
+
+
+
+
+
+
+
