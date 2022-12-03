@@ -1,12 +1,12 @@
 ---
-title: "trab4"
-author: "Pedro Vinicius Alves"
+title: "Trabalho 4"
+author: "Pedro Vinicius Alves - 10727865"
 date: "2022-11-20"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
@@ -25,9 +25,6 @@ library(gridExtra )
 
 
 ## Lista 6 - Questão 1
-
-
-
 
 
 ```{r cars}
@@ -83,7 +80,7 @@ fviz_contrib(protein_pca, choice = "var", axes = 4, top = 15)
 
 
 A seguir, procuramos propor uma interpretação para as quatro primeiras componentes principais.
-PC1 - componente de relação entre produtos de origem animal e origem vegetal, já que cereais, nozes e sementes, ovos e leites contribuem significativamente para a PC1 e os dois primeiros tem correlação negativa com PC1, enquanto os dois últimos possuem correlação positiva.
+PC1 - componente de contraste entre produtos de origem animal e origem vegetal, já que cereais, nozes e sementes, ovos e leites contribuem significativamente para a PC1 e os dois primeiros tem correlação negativa com PC1, enquanto os dois últimos possuem correlação positiva.
 PC2 - componente de consumo de peixes, já que há forte correlação entre o consumo de peixe e PC2
 PC3 - componente de consumo de carne branca, já que esse tipo de proteína contribui mais para a PC3 e tem forte correlação com ela
 PC4 - componente de contraste entre o consumo de carne vermelha e frutas e vegetais, já que ambas contribuem significativamente para a PC4 e a primeira tem correlação positiva, enquanto a segunda tem correlação negativa com a PC4.
@@ -106,9 +103,26 @@ data_protein[c(17,19),]
 Testando várias quantidades de fatores, a proporção de variância explicada não é significativamente melhorada por mais de 4 fatores, então seguimos a análise com essa quantidade.
 
 ```{r}
-fit1 <- principal( data_drop,nfactors=4, rotate="none", fm = 'mle',scores = T) # 
+fit1 <- principal( data_drop,nfactors=4, rotate="none", fm = 'mle',scores = T, residuals = TRUE)
+
 fit1
 ```
+
+```{r}
+fit1$PVAL
+```
+
+
+Percebe que as variáveis mais bem explicadas pelo modelo de 4 fatores é white.meat, milk. fish, cereals, nuts e frutas e vegetais. bem como a variável referente ao total.
+
+A comunalidade geral é de 8.22, um valor satisfatório considerando que nossa conjunto de dados possuia 10 características
+
+```{r}
+overall_communality <- sum(fit1$communality)/length(data_drop)
+overall_communality
+
+```
+
 
 
 
@@ -121,9 +135,7 @@ ggplot(data_protein, aes(x= scores.bart[, 1], y= scores.bart[, 2], colour="red",
 
 
 ```
-```{r}
 
-```
 
 
 Podemos procurar melhorar a interpretação dos fatores por meio de uma rotação. AO utilizarmos o método varimax, vemos que Portugal e Espanha não mais se distinguem. Ao invés disso, temos um espaçamento quase homogêneo dos países
